@@ -2,21 +2,25 @@ from gtts import gTTS
 import pathlib
 import shutil
 import sys
+import pandas as pd
+from datetime import datetime
 
-
-
-def option_menu():
+def menu():
     instructions =  """
     *******************************************
                 CONVERT TEXT IN AUDIO
     * Instructions:
     - Select the language
-    - Write text you want to convert
+    - Select option to convert text to audio
     - Choose name of the audio file
     *******************************************
     """
+ 
+    print("{}".format(instructions))
 
-    lenguage =  """
+
+def option_lenguage():
+    lenguage_memu =  """
     *******************************************
     * Language:
     [0] Exit
@@ -25,31 +29,99 @@ def option_menu():
     [3] Italiano -> it
     *******************************************
     """
+    print("{}".format(lenguage_memu))
+    option_lenguage = int(input("Option -> "))
+    return option_lenguage
 
-    print(instructions)
-    print(lenguage)
-    option = int(input("Option -> "))
-    return option
+
+def option_text_input():
+    text_input_menu =  """
+    *******************************************
+    * Text input:
+    [1] Write text
+    [2] Import file .txt 
+    [3] Import file .csv
+    *******************************************
+    """
+    print("{}".format(text_input_menu ))
+    option_text_input = int(input("Option -> "))
+    return option_text_input
 
 
 def text_input():
+    text_input = input("Text -> ")
+    return text_input
+
+
+def text_txt():
+    path = "./file_text.txt"
+    text_txt = ""
+    with open(path, "r", encoding="utf-8") as t:
+        for line in t:
+            text_txt += line.strip("\n")
+    return text_txt
+
+
+def text_csv():
+    df = pd.read_csv("./colores.csv")
+    columns = df.columns
+    print("{}\n".format(df))
+    cont = 0
+    for col in columns:
+        print("[{}] {}".format(cont, col))
+        cont +=1
+    try:
+        option_column = int(input("Option -> "))
+        text_csv = df.iloc[:,option_column]
+        text_csv = list(text_csv)
+        return text_csv
+    except ValueError:
+        print("###############################################")
+        print("ValueError: invalid option, try again with numeric option")
+        print("###############################################")
+
+def text_data():
     while True:
         try:
-            text = text = input("Convert text -> ")
-            print (end= "")
-            if(not(text and text.strip())):
-                raise ValueError("*Cannot enter an empty string")
-            return text
-        except ValueError as ve:
-            print(ve)
+            option_text = option_text_input()
+        except ValueError:
+            print("###############################################")
+            print("ValueError: invalid option, try again with numeric option")
+            print("###############################################")
             continue
+
+        if option_text == 1: # Write text
+            text= ""
+            while True:
+                try:
+                    text = text_input()
+                    if(not(text and text.strip())):
+                        raise ValueError("*Cannot enter an empty string")
+                    return text
+                except ValueError as ve:
+                    print(ve)
+                    continue
+
+        elif option_text == 2: # Import file .txt
+              text= ""
+              text = text_txt()
+              return text
+
+        elif option_text == 3: # CSV
+            text= ""
+            text = text_csv()
+            return text
+
+        else: # Option invalid
+            print("###############################################")
+            print("Choose a valid option from the menu")
+            print("###############################################")
 
 
 def audio_name():
     while True:    
         try:
             name_audio = input("Name audio .mp3 -> ")
-            print (end= "")
             if(not(name_audio and name_audio.strip())):
                 raise ValueError("**Cannot enter an empty string")
             return name_audio
@@ -59,24 +131,43 @@ def audio_name():
 
 
 def audio_convert(LANG, TLD):
-    text = text_input() # Input text
-    name_mp3 = audio_name() # Choose name file
-    name_mp3 += ".mp3"
-    audio = gTTS(text, lang=LANG, tld=TLD) # Convert texto to audio
-    print("Your text is converting...")
-    audio.save(name_mp3) # Save audio file
+    text = text_data() # Input text
+    name = audio_name() # Choose name for file
+    if type(text) == str:
+      now_time = str(datetime.now())
+      now_time = now_time[0:22]
+      name_mp3 = name + now_time
+      name_mp3 += ".mp3"
+      audio = gTTS(text, lang=LANG, tld=TLD) # Convert texto to audio
+      print("Your text is converting...")
+      audio.save(name_mp3) # Save audio file
+      # Output move file
+      path = pathlib.Path().absolute() # Get path
+      path = str(path) + '/output/'
+      shutil.move(name_mp3, path) # move file audio to output folder
+      print("Save >>> " + path + name_mp3)
 
-    # Output move file
-    path = pathlib.Path().absolute() # Get path
-    path = str(path) + '/output/'
-    shutil.move(name_mp3, path) # move file audio to output folder
-    print("Save >>> " + path)
+    if type(text) == list:
+      print(text)
+      for word in text:
+        now_time = str(datetime.now())
+        now_time = now_time[0:22]
+        name_mp3 = name + now_time
+        name_mp3 += ".mp3"
+        print(word)
+        audio = gTTS(word, lang=LANG, tld=TLD) # Convert texto to audio
+        print("Your text {} is converting...".format(word))
+        audio.save(name_mp3) # Save audio file
+        path = './output'
+        shutil.move(name_mp3, path) # move file audio to output folder
+        print("Save >>> " + path + "/" + name_mp3)
 
 
 def main():
     while True:
         try:
-            option = option_menu()
+            menu()
+            option = option_lenguage()
         except ValueError:
             print("###############################################")
             print("ValueError: invalid option, try again with numeric option")
@@ -85,7 +176,7 @@ def main():
 
         if option == 0: # Exit program
             print("Exit...")
-            break
+            quit()
         elif option == 1: # Spanish
             LANG = "es"
             TLD = "es"
@@ -107,8 +198,8 @@ def main():
 def run():
     try:
         main()
-    except KeyboardInterrupt:
-        print("\n Ciao")
+    except KeyboardInterrupt as keyin:
+        print("\n" + str(keyin))
         sys.exit()
 
 if __name__ == "__main__":
