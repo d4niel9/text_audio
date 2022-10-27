@@ -45,10 +45,19 @@ $ python3 master.py
     *******************************************
     
 Option -> 2
-Convert text -> hi
-Name audio .mp3 -> greeting
+
+ *******************************************
+    * Text input:
+    [1] Write text
+    [2] Import file .txt 
+    [3] Import file .csv
+    *******************************************
+
+Option -> ...
+
+Name audio .mp3 -> 
 Your text is converting...
-Save >>> ...output/
+Save >>> ./output/greeting2022-10-26 23:13:40.19.mp3
 ```
 
 
