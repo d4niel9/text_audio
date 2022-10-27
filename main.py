@@ -4,6 +4,9 @@ import shutil
 import sys
 import pandas as pd
 from datetime import datetime
+from tkinter import *
+from tkinter import filedialog
+
 
 def menu():
     instructions =  """
@@ -54,16 +57,26 @@ def text_input():
 
 
 def text_txt():
-    path = "./file_text.txt"
+    path = filedialog.askopenfilename(title = "Select a File", 
+                                          filetypes = (("Text files", 
+                                                        "*.txt*"), 
+                                                       ("all files", 
+                                                        "*.*")))
     text_txt = ""
     with open(path, "r", encoding="utf-8") as t:
         for line in t:
+            print(line)
             text_txt += line.strip("\n")
     return text_txt
 
 
 def text_csv():
-    df = pd.read_csv("./colores.csv")
+    path = filedialog.askopenfilename(title = "Select a File", 
+                                          filetypes = (("Text files", 
+                                                        "*.csv*"), 
+                                                       ("all files", 
+                                                        "*.*")))
+    df = pd.read_csv(path)
     columns = df.columns
     print("{}\n".format(df))
     cont = 0
@@ -117,7 +130,6 @@ def text_data():
             print("Choose a valid option from the menu")
             print("###############################################")
 
-
 def audio_name():
     while True:    
         try:
@@ -136,7 +148,7 @@ def audio_convert(LANG, TLD):
     if type(text) == str:
       now_time = str(datetime.now())
       now_time = now_time[0:22]
-      name_mp3 = name + now_time
+      name_mp3 = name + "-" + now_time
       name_mp3 += ".mp3"
       audio = gTTS(text, lang=LANG, tld=TLD) # Convert texto to audio
       print("Your text is converting...")
@@ -149,14 +161,15 @@ def audio_convert(LANG, TLD):
 
     if type(text) == list:
       print(text)
+      cont = 1
       for word in text:
         now_time = str(datetime.now())
         now_time = now_time[0:22]
-        name_mp3 = name + now_time
+        name_mp3 = name + str(cont) + "-" + now_time
+        cont += 1
         name_mp3 += ".mp3"
-        print(word)
         audio = gTTS(word, lang=LANG, tld=TLD) # Convert texto to audio
-        print("Your text {} is converting...".format(word))
+        print("Your text '{}' is converting...".format(word))
         audio.save(name_mp3) # Save audio file
         path = './output'
         shutil.move(name_mp3, path) # move file audio to output folder
@@ -204,4 +217,3 @@ def run():
 
 if __name__ == "__main__":
     run()
-    
